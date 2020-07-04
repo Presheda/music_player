@@ -209,6 +209,20 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_audio_query:
+    dependency: "direct main"
+    description:
+      name: flutter_audio_query
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.4+2"
+  flutter_exoplayer:
+    dependency: "direct main"
+    description:
+      name: flutter_exoplayer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.5"
   flutter_icons:
     dependency: "direct main"
     description:
@@ -216,6 +230,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.8"
   flutter_statusbarcolor:
     dependency: "direct main"
     description:
@@ -597,6 +618,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.0"
   vector_math:
     dependency: transitive
     description:
