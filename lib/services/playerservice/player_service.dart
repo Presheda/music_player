@@ -1,4 +1,5 @@
 
+import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_exoplayer/audioplayer.dart';
 
 abstract class PlayerService{
@@ -6,7 +7,9 @@ abstract class PlayerService{
 
   Future<dynamic> playSong(String url);
 
-  Future<dynamic> playAll(List<String> url);
+  Future<dynamic> playAll();
+
+  Future<dynamic> playPlaylist(String playListName);
 
   Future<dynamic> pauseSong();
 
@@ -16,13 +19,19 @@ abstract class PlayerService{
 
   Future<dynamic> next();
 
-  Future<dynamic> seek();
+  Future<dynamic> seek(double position);
 
   Stream<Duration> duration();
 
-  void audioPosition();
+  Stream<Duration> audioPosition();
 
-  void playerState();
+ Stream<PlayerState>  playerState();
+
+ Future<Duration> getCurrentDuration();
+
+ Stream<int> audioIndex();
+
+ SongInfo getCurrentSong();
 
 
 }

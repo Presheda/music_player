@@ -9,12 +9,37 @@ class QuerySongServiceImpl implements QuerySongService {
 
   FlutterAudioQuery audioQuery = getIt<FlutterAudioQuery>();
 
+  List<SongInfo> songInfo = [];
+
+  QuerySongServiceImpl (){
+
+    querySong();
+  }
+
+  void querySong() async {
+    songInfo = await audioQuery.getSongs();
+  }
+
   @override
-  Future<List<SongInfo>> songList() async {
+  List<SongInfo> songList()  {
+    return songInfo;
+  }
 
-    //List<SongInfo> songs = await audioQuery.getSongs();
+  @override
+  void refresh() {
+    querySong();
+  }
 
-    return audioQuery.getSongs();
+  @override
+  List<String> url() {
+
+    List<String> urls =[];
+
+    songInfo.forEach((element) {
+      urls.add(element.filePath);
+    });
+
+    return urls;
 
   }
 

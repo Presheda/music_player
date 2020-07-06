@@ -40,36 +40,53 @@ class NowPlaying extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(left: 20, right: 20),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       SizedBox(
                         height: 20,
                       ),
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.65,
-                        height: MediaQuery.of(context).size.width * 0.65,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: AssetImage(
-                                    "assets/images/man_singing.jpg"))),
+                      Center(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.65,
+                          height: MediaQuery.of(context).size.width * 0.65,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: AssetImage(
+                                      "assets/images/man_singing.jpg"))),
+                        ),
                       ),
                       SizedBox(
                         height: 30,
                       ),
-                      Text("Better Together",
-                          style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black)),
-                      SizedBox(
-                        height: 10,
+
+                      Center(
+                        child: GetBuilder<NowPlayingViewModel>(
+                          id: "songInfo",
+                          builder: (con){
+                            return Column(
+                              children: <Widget>[
+                                Text(con.songTitle,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black)),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(con.songArtist,
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff8C93A4))),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                      Text("Kanye West",
-                          style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff8C93A4))),
+
                       SizedBox(
                         height: 30,
                       ),
@@ -89,9 +106,12 @@ class NowPlaying extends StatelessWidget {
                             id: "slider",
                             builder: (con) {
                               return FlutterSlider(
-                                values: [50],
-                                max: 100,
+                                values: [con.currentTime],
+                                max:  con.totalDuration,
                                 min: 0,
+                                onDragging: (handlerIndex, lowerValue, upperValue) {
+                                  con.seek(lowerValue);
+                                },
                                 handler: FlutterSliderHandler(
                                   decoration: BoxDecoration(),
                                   child: Container(
@@ -116,53 +136,94 @@ class NowPlaying extends StatelessWidget {
                               );
                             }),
                       ),
+
+                      SizedBox(
+                        height: 5,
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 20
+                        ),
+                        child: GetBuilder<NowPlayingViewModel>(
+                          id: "songDuration",
+                          builder: (con){
+                            return   Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(con.formatCurrentDuration(),
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: Colors.black
+                                  ),
+                                ),
+
+                                Text(con.formatTotalDuration(),
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: Colors.black
+                                  ),
+                                ),
+                              ],
+                            );
+
+                          },
+                        ),
+                      ),
+
                       SizedBox(
                         height: 20,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 30, right: 30),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            IconButton(
-                                icon: Icon(
-                                  Ionicons.md_skip_backward,
-                                  color: Color(0xffD6E0EA),
+                      GetBuilder<NowPlayingViewModel>(
+                        id: "playControllerButton",
+                        builder: (con){
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 30, right: 30),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                IconButton(
+                                    icon: Icon(
+                                      Ionicons.md_skip_backward,
+                                      color: Color(0xffD6E0EA),
+                                    ),
+                                    onPressed: con.previous),
+                                Material(
+                                  color: Color(0xffF2F7FD),
+                                  borderOnForeground: false,
+                                  shape: CircleBorder(),
+                                  elevation: 10.0,
+                                  child: Container(
+                                    width: 55,
+                                    height: 55,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Color(0xffFECFB3)),
+                                    child: Center(
+                                      child: IconButton(
+                                          icon: Icon(
+                                            model.isPlaying() ?  Ionicons.md_pause :  Ionicons.md_play,
+                                            size: 30,
+                                            color: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            model.play();
+                                          }),
+                                    ),
+                                  ),
                                 ),
-                                onPressed: () {}),
-                            Material(
-                              color: Color(0xffF2F7FD),
-                              borderOnForeground: false,
-                              shape: CircleBorder(),
-                              elevation: 10.0,
-                              child: Container(
-                                width: 55,
-                                height: 55,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color(0xffFECFB3)),
-                                child: Center(
-                                  child: IconButton(
-                                      icon: Icon(
-                                        model.isPlaying() ?  Ionicons.md_pause :  Ionicons.md_play,
-                                        size: 30,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: () {
-                                        model.play();
-                                      }),
+                                IconButton(
+                                    icon: Icon(
+                                      Ionicons.md_skip_forward,
+                                      color: Color(0xffD6E0EA),
+                                    ),
+                                    onPressed: con.next
                                 ),
-                              ),
+                              ],
                             ),
-                            IconButton(
-                                icon: Icon(
-                                  Ionicons.md_skip_forward,
-                                  color: Color(0xffD6E0EA),
-                                ),
-                                onPressed: () {}),
-                          ],
-                        ),
+                          );
+                        },
                       )
                     ],
                   ),

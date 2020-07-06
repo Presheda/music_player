@@ -1,14 +1,38 @@
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_exoplayer/audioplayer.dart';
+import 'package:music_player/services/hiveservice/hiveservice.dart';
+import 'package:music_player/services/locator.dart';
 import 'package:music_player/services/playerservice/player_service.dart';
+import 'package:music_player/services/querysong/query_song_service.dart';
 
 class PlayerServiceImpl implements PlayerService {
-  var player = AudioPlayer();
+  var player = getIt<AudioPlayer>();
+  var queryService = getIt<QuerySongService>();
 
+  SongInfo songInfo;
+
+  List<String> urls = [];
+
+  var hiveService = getIt<HiveService>();
+  int currentAudioIndex = 0;
+
+  PlayerServiceImpl() {
+    player.onCurrentAudioIndexChanged.listen((event) {
+
+      print("AudioIndex 1");
+
+      currentAudioIndex = event;
+      saveLastPlayed();
+    });
+
+    player.onPlayerCompletion.listen((event) {
+      print("One audio has just finished playing");
+    });
+  }
 
   @override
   Future next() {
-   return player.next();
+    return player.next();
   }
 
   @override
@@ -24,39 +48,43 @@ class PlayerServiceImpl implements PlayerService {
 
     await player.release();
 
-   return player.play(url);
+    return player.play(url);
+  }
+
+
+  @override
+  Future playPlaylist(String playListName) {
+
   }
 
   @override
-  Future playAll(List<String> url) async {
+  Future playAll() async {
 
-    print("play all called");
-    print(url);
 
     if (player.state == PlayerState.PLAYING) {
       await player.stop();
     }
 
+    this.urls = queryService.url();
     await player.release();
-    return player.playAll(url);
+    return player.playAll(urls);
   }
 
   @override
   Future previous() {
-
-   return player.previous();
+    return player.previous();
   }
 
   @override
   Future resumeSong() {
-    // TODO: implement resumeSong
-    throw UnimplementedError();
+    return player.resume();
   }
 
   @override
-  Future seek() {
-    // TODO: implement seek
-    throw UnimplementedError();
+  Future seek(double position) {
+    Duration duration = Duration(seconds: position.floor());
+
+    return player.seekPosition(duration);
   }
 
   @override
@@ -64,25 +92,53 @@ class PlayerServiceImpl implements PlayerService {
     return player.onDurationChanged;
   }
 
-   void audioPosition() {
-
-     player.onAudioPositionChanged.listen((event) {
-
-       print("AudioPosition is ${event.inSeconds}");
-
-    });
+  @override
+  Stream<Duration> audioPosition() {
+    return player.onAudioPositionChanged;
   }
 
   @override
-  void playerState() {
-
-
-
-    player.onPlayerStateChanged.listen((event) {
-      print("PlayerState changed");
-    });
-
+  Stream<PlayerState> playerState() {
+    return player.onPlayerStateChanged;
   }
 
+  @override
+  Future<Duration> getCurrentDuration() {
+    return player.getDuration();
+  }
+
+  @override
+  Stream<int> audioIndex() {
+    return player.onCurrentAudioIndexChanged;
+  }
+
+  @override
+  SongInfo getCurrentSong(){
+
+    return this.songInfo;
+  }
+
+  void saveLastPlayed() async {
+
+
+    print("Checking 1");
+
+
+    SongInfo songInfo = queryService.songList()[currentAudioIndex];
+
+    var box = await hiveService.openBox("lastPlayed");
+
+    if (currentAudioIndex < 0 || urls.length <= 0) return;
+
+
+    print("Checking 2");
+
+
+    this.songInfo = songInfo;
+
+    box.put("song", songInfo);
+
+
+  }
 
 }
