@@ -8,7 +8,7 @@ import 'package:music_player/ui/homepage/now_playing.dart';
 import 'package:music_player/ui/shared/main_page.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'model/SongInfoAdapter.dart';
+import 'model/HiveSongInfo.dart';
 
 void main() async {
 
@@ -17,10 +17,11 @@ void main() async {
   setupServices();
 
   await FlutterStatusbarcolor.setStatusBarColor(Color(0xffFECFB3));
-  Hive.registerAdapter(SongInfoAdapter());
+
 
   final dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
+  Hive.registerAdapter(HiveSongInfoAdapter());
 
   runApp(MyApp());
 }

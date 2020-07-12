@@ -1,13 +1,14 @@
 
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_exoplayer/audioplayer.dart';
+import 'package:music_player/model/HiveSongInfo.dart';
 
 abstract class PlayerService{
 
 
   Future<dynamic> playSong(String url);
 
-  Future<dynamic> playAll();
+  Future<dynamic> playAll({int index});
 
   Future<dynamic> playPlaylist(String playListName);
 
@@ -31,7 +32,8 @@ abstract class PlayerService{
 
  Stream<int> audioIndex();
 
- SongInfo getCurrentSong();
+ Future<HiveSongInfo> getCurrentSong();
 
+ PlayerState getPlayerState();
 
 }

@@ -9,6 +9,8 @@ import 'package:music_player/ui/play_list/play_list.dart';
 import 'package:music_player/viewmodel/MainPageViewModel.dart';
 
 class MainPage extends StatelessWidget {
+
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<MainPageViewModel>(

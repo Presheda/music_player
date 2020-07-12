@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_exoplayer/audioplayer.dart';
+import 'package:music_player/model/HiveSongInfo.dart';
 import 'package:music_player/services/hiveservice/hiveservice.dart';
 import 'package:music_player/services/locator.dart';
 import 'package:music_player/services/playerservice/player_service.dart';
@@ -9,7 +12,7 @@ class PlayerServiceImpl implements PlayerService {
   var player = getIt<AudioPlayer>();
   var queryService = getIt<QuerySongService>();
 
-  SongInfo songInfo;
+  HiveSongInfo songInfo;
 
   List<String> urls = [];
 
@@ -17,17 +20,42 @@ class PlayerServiceImpl implements PlayerService {
   int currentAudioIndex = 0;
 
   PlayerServiceImpl() {
+    loadPreviousSong();
+
     player.onCurrentAudioIndexChanged.listen((event) {
-
-      print("AudioIndex 1");
-
       currentAudioIndex = event;
       saveLastPlayed();
     });
 
+
+
     player.onPlayerCompletion.listen((event) {
       print("One audio has just finished playing");
     });
+  }
+
+  Future<void> loadPreviousSong() async {
+    var box = await hiveService.openBox("lastPlayed");
+
+    var songInfo = box.get("song");
+
+    this.songInfo = songInfo;
+
+
+  }
+
+  @override
+  Future<HiveSongInfo> getCurrentSong() async {
+    if (this.songInfo == null) {
+      await loadPreviousSong();
+    }
+    return this.songInfo;
+  }
+
+  @override
+  PlayerState getPlayerState(){
+
+    return player.playerState;
   }
 
   @override
@@ -51,23 +79,18 @@ class PlayerServiceImpl implements PlayerService {
     return player.play(url);
   }
 
+  @override
+  Future playPlaylist(String playListName) {}
 
   @override
-  Future playPlaylist(String playListName) {
-
-  }
-
-  @override
-  Future playAll() async {
-
-
+  Future playAll({int index, int position}) async {
     if (player.state == PlayerState.PLAYING) {
       await player.stop();
     }
 
     this.urls = queryService.url();
     await player.release();
-    return player.playAll(urls);
+    return player.playAll(urls, index: index);
   }
 
   @override
@@ -112,33 +135,17 @@ class PlayerServiceImpl implements PlayerService {
     return player.onCurrentAudioIndexChanged;
   }
 
-  @override
-  SongInfo getCurrentSong(){
 
-    return this.songInfo;
-  }
 
   void saveLastPlayed() async {
-
-
-    print("Checking 1");
-
-
+    if (currentAudioIndex < 0 || urls.length <= 0) return;
     SongInfo songInfo = queryService.songList()[currentAudioIndex];
-
+    HiveSongInfo hiveSongInfo = HiveSongInfo();
+    hiveSongInfo.mapSong(songInfo);
+    hiveSongInfo.index = currentAudioIndex;
+    this.songInfo = hiveSongInfo;
     var box = await hiveService.openBox("lastPlayed");
 
-    if (currentAudioIndex < 0 || urls.length <= 0) return;
-
-
-    print("Checking 2");
-
-
-    this.songInfo = songInfo;
-
-    box.put("song", songInfo);
-
-
+    box.put("song", hiveSongInfo);
   }
-
 }

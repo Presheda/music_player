@@ -13,6 +13,7 @@ class NowPlaying extends StatelessWidget {
   Widget build(BuildContext context) {
   return  GetBuilder<NowPlayingViewModel>(
         init: NowPlayingViewModel(),
+
         builder: (model) {
           return Scaffold(
             backgroundColor: Color(0xffF2F7FD),

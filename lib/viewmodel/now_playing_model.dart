@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_exoplayer/audioplayer.dart';
 import 'package:get/get.dart';
+import 'package:music_player/model/HiveSongInfo.dart';
 import 'package:music_player/services/locator.dart';
 import 'package:music_player/services/playerservice/player_service.dart';
 import 'package:music_player/services/querysong/query_song_service.dart';
 
 class NowPlayingViewModel extends GetxController {
   var playerService = getIt<PlayerService>();
-  var querySong = getIt<QuerySongService>();
+
   double totalDuration = 100;
   double _currentTime = 100;
 
@@ -29,6 +30,13 @@ class NowPlayingViewModel extends GetxController {
   String songDisplayName = "";
   String songArtist = "";
 
+
+  NowPlayingViewModel(){
+    addSubscriptions();
+    audioInfo();
+    playerStateChanged(playerService.getPlayerState());
+  }
+
   void play() async {
     if (_isPlaying) {
       playerService.pauseSong();
@@ -41,19 +49,13 @@ class NowPlayingViewModel extends GetxController {
     }
 
 
-    playerService.playAll();
+    playerService.playAll( index: currentIndex);
   }
 
   bool isPlaying() {
     return _isPlaying;
   }
 
-  @override
-  void onInit() {
-    addSubscriptions();
-
-    super.onInit();
-  }
 
   void previous() {
     playerService.previous();
@@ -63,12 +65,16 @@ class NowPlayingViewModel extends GetxController {
     playerService.next();
   }
 
-  void audioInfo() {
 
 
-    print("AudioIndex 2");
+  void audioInfo() async {
+    HiveSongInfo songInfo = await playerService.getCurrentSong();
 
-    SongInfo songInfo = playerService.getCurrentSong();
+    if(songInfo == null){
+      return;
+    }
+
+    currentIndex = songInfo.index;
 
     totalDuration = double.tryParse(songInfo.duration);
     totalDuration = (totalDuration / 1000);
@@ -100,6 +106,8 @@ class NowPlayingViewModel extends GetxController {
 
     return "$minutes:$seconds";
   }
+
+
 
   void addSubscriptions() async {
     duration = playerService.audioPosition().listen((event) {
