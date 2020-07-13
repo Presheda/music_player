@@ -11,6 +11,8 @@ class QuerySongServiceImpl implements QuerySongService {
 
   List<SongInfo> songInfo = [];
 
+  List<SongInfo> playListFavorite = [];
+
   QuerySongServiceImpl (){
 
     querySong();
@@ -23,6 +25,17 @@ class QuerySongServiceImpl implements QuerySongService {
   @override
   List<SongInfo> songList()  {
     return songInfo;
+  }
+
+ @override
+  List<SongInfo> playListFavorites()  {
+    return playListFavorite;
+  }
+
+  @override
+  void addPlayListFavorite(List<SongInfo> songInfo){
+    this.playListFavorite = songInfo;
+
   }
 
   @override

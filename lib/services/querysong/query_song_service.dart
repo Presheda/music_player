@@ -5,7 +5,11 @@ abstract class QuerySongService {
 
   List<SongInfo> songList();
 
+  List<SongInfo> playListFavorites();
+
   List<String> url();
+
+  void addPlayListFavorite(List<SongInfo> song);
 
   void refresh();
 

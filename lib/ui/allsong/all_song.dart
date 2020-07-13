@@ -27,7 +27,7 @@ class AllSongs extends StatelessWidget {
             body: ListView.separated(
                 itemBuilder: (c, i) {
                   return ListTile(
-                    onTap: (){
+                    onTap: () {
                       model.playSong(i);
                     },
                     leading: Container(
@@ -53,8 +53,8 @@ class AllSongs extends StatelessWidget {
                             color: Color(0xff8C93A4))),
                     trailing: GetBuilder<AllSongViewModel>(
                       id: "updateIcons",
-                      builder: (model){
-                        return showIcons(model, i);
+                      builder: (model) {
+                        return showIcons(model, i, model.songList[i].filePath);
                       },
                     ),
                   );
@@ -67,16 +67,14 @@ class AllSongs extends StatelessWidget {
     );
   }
 
-  showIcons(AllSongViewModel model, int position) {
-
-    print("ShowIcon rebuilt");
+  showIcons(AllSongViewModel model, int position, String url) {
 
     bool isCurrentSong = model.currentUrl == model.songList[position].filePath;
+    bool favorite = model.isFavorite(url);
 
     if (isCurrentSong) {
       if (model.isPlaying) {
         return Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
-
           IconButton(
               icon: Icon(
                 Icons.pause,
@@ -86,22 +84,13 @@ class AllSongs extends StatelessWidget {
               onPressed: () {
                 model.playPause();
               }),
-
           SizedBox(
             width: 15,
           ),
-
-          IconButton(
-              icon: Icon(
-                Icons.favorite_border,
-              ),
-              onPressed: () {}),
-
-
+          favoriteIcon(model, favorite, url)
         ]);
       } else if (model.isPaused) {
         return Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
-
           IconButton(
               icon: Icon(
                 Icons.play_arrow,
@@ -111,34 +100,34 @@ class AllSongs extends StatelessWidget {
               onPressed: () {
                 model.playPause();
               }),
-
           SizedBox(
             width: 15,
           ),
-
-          IconButton(
-              icon: Icon(
-                Icons.favorite_border,
-              ),
-              onPressed: () {
-
-              }),
-
+          favoriteIcon(model, favorite, url)
         ]);
-      } else{
-        return  IconButton(
-            icon: Icon(
-              Icons.favorite_border,
-            ),
-            onPressed: () {});
+      } else {
+        return favoriteIcon(model, favorite, url);
       }
     } else {
+      return favoriteIcon(model, favorite, url);
+    }
+  }
 
-      return  IconButton(
+  favoriteIcon(AllSongViewModel model, bool favorite, String url) {
+    if (favorite) {
+      return IconButton(
+          icon: Icon(Icons.favorite, color: Colors.red),
+          onPressed: () {
+            model.saveFavoriteSong(url);
+          });
+    } else {
+      return IconButton(
           icon: Icon(
             Icons.favorite_border,
           ),
-          onPressed: () {});
+          onPressed: () {
+            model.saveFavoriteSong(url);
+          });
     }
   }
 }

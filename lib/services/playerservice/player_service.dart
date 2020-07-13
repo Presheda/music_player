@@ -10,7 +10,7 @@ abstract class PlayerService{
 
   Future<dynamic> playAll({int index});
 
-  Future<dynamic> playPlaylist(String playListName);
+  Future<dynamic> playPlaylistFavorites(List<String> url, int index);
 
   Future<dynamic> pauseSong();
 

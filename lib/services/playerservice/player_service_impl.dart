@@ -19,6 +19,9 @@ class PlayerServiceImpl implements PlayerService {
   var hiveService = getIt<HiveService>();
   int currentAudioIndex = 0;
 
+  bool playListFavorite = false;
+
+
   PlayerServiceImpl() {
     loadPreviousSong();
 
@@ -80,7 +83,17 @@ class PlayerServiceImpl implements PlayerService {
   }
 
   @override
-  Future playPlaylist(String playListName) {}
+  Future playPlaylistFavorites(List<String> url, int index) async {
+
+    if (player.state == PlayerState.PLAYING) {
+      await player.stop();
+    }
+
+    this.urls = url;
+    await player.release();
+    this.playListFavorite = true;
+    return player.playAll(urls, index: index);
+  }
 
   @override
   Future playAll({int index, int position}) async {
@@ -90,6 +103,7 @@ class PlayerServiceImpl implements PlayerService {
 
     this.urls = queryService.url();
     await player.release();
+    this.playListFavorite = false;
     return player.playAll(urls, index: index);
   }
 
@@ -139,7 +153,14 @@ class PlayerServiceImpl implements PlayerService {
 
   void saveLastPlayed() async {
     if (currentAudioIndex < 0 || urls.length <= 0) return;
-    SongInfo songInfo = queryService.songList()[currentAudioIndex];
+    SongInfo songInfo;
+
+    if(playListFavorite){
+      songInfo = queryService.playListFavorites()[currentAudioIndex];
+    } else{
+      songInfo = queryService.songList()[currentAudioIndex];
+    }
+
     HiveSongInfo hiveSongInfo = HiveSongInfo();
     hiveSongInfo.mapSong(songInfo);
     hiveSongInfo.index = currentAudioIndex;

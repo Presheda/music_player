@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter_audio_query/flutter_audio_query.dart';
@@ -10,13 +9,12 @@ import 'package:music_player/services/locator.dart';
 import 'package:music_player/services/playerservice/player_service.dart';
 import 'package:music_player/services/querysong/query_song_service.dart';
 
-class AllSongViewModel extends GetxController {
+class FavoriteSongModel extends GetxController {
   var playerService = getIt<PlayerService>();
   var queryService = getIt<QuerySongService>();
   var hiveService = getIt<HiveService>();
 
-
-  List<SongInfo> songList;
+  List<SongInfo> songList = [];
   List<String> favUrls = [];
 
   StreamSubscription<int> audioIndex;
@@ -27,92 +25,87 @@ class AllSongViewModel extends GetxController {
   bool isPaused = false;
   bool isPlaying = false;
 
+  String currentUrl = "";
 
-
-
-  String currentUrl ="";
-
-  AllSongViewModel(){
+  FavoriteSongModel() {
     addSubSubscription();
 
-    fetchSong();
     fetchFavorite();
+    fetchSong();
 
     getCurrentSongUrl();
     playerStateChanged(playerService.getPlayerState());
+  }
 
+  void fetchSong() async {
+
+    await fetchFavorite();
+
+    FlutterAudioQuery query = FlutterAudioQuery();
+
+    songList = await query.getSongs()..retainWhere((element) => favUrls.contains(element.filePath));
+    queryService.addPlayListFavorite(songList);
+    print("Favorite Song Size is ${songList.length}");
+
+    update();
 
   }
 
-  void fetchSong() {
-    songList = queryService.songList();
-    print("Song Size is ${songList.length}");
+  Future<void> fetchFavorite()  {
+   return Future(() async{
+     var box = await hiveService.openBox("favoriteSongs");
+
+     favUrls = box.get("fav");
+     if (favUrls == null) {
+       favUrls = [];
+     }
+    });
   }
 
-  void fetchFavorite()async {
-
-    var box = await hiveService.openBox("favoriteSongs");
-
-
-    favUrls = box.get("fav");
-    if(favUrls == null){
-      favUrls = [];
-    }
-    update(["updateIcons"]);
-
-  }
-
-  bool isFavorite(String url){
-
+  bool isFavorite(String url) {
     return favUrls.contains(url);
   }
 
-  void saveFavoriteSong(String url)async{
+  void saveFavoriteSong(String url) async {
 
-    bool isAdded = favUrls.contains(url);
 
-    if(isAdded){
+    favUrls.remove(url);
+    songList.removeWhere((element) => element.filePath == url);
+    queryService.addPlayListFavorite(songList);
 
-      favUrls.remove(url);
-    } else{
+    if(url == currentUrl){
 
-      favUrls.add(url);
+      if(currentAudioIndex > url.length) currentAudioIndex --;
+      playSong(currentAudioIndex);
     }
-    update(["updateIcons"]);
+
+    update();
 
     var box = await hiveService.openBox("favoriteSongs");
 
-
     box.put("fav", favUrls);
-
-
   }
 
-  void getCurrentSongUrl() async{
+  void getCurrentSongUrl() async {
     HiveSongInfo songInfo = await playerService.getCurrentSong();
     currentUrl = songInfo.url;
     update(["updateIcons"]);
   }
 
-
-  void playSong(int index){
-
-    playerService.playAll( index: index);
-
+  void playSong(int index) {
+    playerService.playPlaylistFavorites(favUrls, index);
   }
 
-  void playPause(){
-    if(isPlaying){
+  void playPause() {
+    if (isPlaying) {
       playerService.pauseSong();
 
       return;
     }
 
-    if(isPaused){
+    if (isPaused) {
       playerService.resumeSong();
     }
-
-
   }
 
   void playerStateChanged(PlayerState state) {
@@ -122,8 +115,7 @@ class AllSongViewModel extends GetxController {
     update(["updateIcons"]);
   }
 
-
-  addSubSubscription(){
+  addSubSubscription() {
     state = playerService.playerState().listen((event) {
       playerStateChanged(event);
     });
@@ -133,7 +125,7 @@ class AllSongViewModel extends GetxController {
       getCurrentSongUrl();
       print("Audio Index Changed $event");
 
-     // audioInfo();
+      // audioInfo();
     });
   }
 
@@ -144,6 +136,4 @@ class AllSongViewModel extends GetxController {
 
     super.onClose();
   }
-
-
 }
