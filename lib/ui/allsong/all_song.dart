@@ -68,7 +68,6 @@ class AllSongs extends StatelessWidget {
   }
 
   showIcons(AllSongViewModel model, int position, String url) {
-
     bool isCurrentSong = model.currentUrl == model.songList[position].filePath;
     bool favorite = model.isFavorite(url);
 
@@ -114,20 +113,30 @@ class AllSongs extends StatelessWidget {
   }
 
   favoriteIcon(AllSongViewModel model, bool favorite, String url) {
-    if (favorite) {
-      return IconButton(
-          icon: Icon(Icons.favorite, color: Colors.red),
-          onPressed: () {
-            model.saveFavoriteSong(url);
-          });
-    } else {
-      return IconButton(
-          icon: Icon(
-            Icons.favorite_border,
-          ),
-          onPressed: () {
-            model.saveFavoriteSong(url);
-          });
-    }
+    String fav = favorite ? "Remove from favorite" : "Add to favorite";
+
+
+
+    return PopupMenuButton<menuItems>(
+      onSelected: (menuItems result) {
+        if (result == menuItems.favorite) {
+          model.saveFavoriteSong(url);
+        } else if (result == menuItems.playlist) {
+          model.addToPlayList(url);
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<menuItems>>[
+        PopupMenuItem<menuItems>(
+          value: menuItems.favorite,
+          child: Text(fav),
+        ),
+        PopupMenuItem<menuItems>(
+          value: menuItems.playlist,
+          child: Text('Add to playlist'),
+        ),
+      ],
+    );
   }
 }
+
+enum menuItems { favorite, playlist }

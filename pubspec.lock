@@ -190,6 +190,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.2"
+  enum_to_string:
+    dependency: "direct main"
+    description:
+      name: enum_to_string
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.9"
   file:
     dependency: transitive
     description:
@@ -262,7 +269,7 @@ packages:
       name: get
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.2"
   get_it:
     dependency: "direct main"
     description:
@@ -347,6 +354,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.12"
+  injectable:
+    dependency: transitive
+    description:
+      name: injectable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.0+1"
   intl:
     dependency: transitive
     description:
@@ -562,6 +576,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.3"
+  stacked_services:
+    dependency: "direct main"
+    description:
+      name: stacked_services
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.4+3"
   stream_channel:
     dependency: transitive
     description:
