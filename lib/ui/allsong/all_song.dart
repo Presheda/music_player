@@ -6,11 +6,9 @@ import 'package:music_player/ui/allsong/AllSongViewModel.dart';
 class AllSongs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print("MainWid rebuilt");
     return GetBuilder<AllSongViewModel>(
       init: AllSongViewModel(),
       builder: (model) {
-        print("SecondWid rebuilt");
         return Scaffold(
             backgroundColor: Color(0xffF2F7FD),
             appBar: AppBar(

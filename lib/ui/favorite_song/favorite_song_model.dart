@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_exoplayer/audioplayer.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player/model/HiveSongInfo.dart';
+import 'package:music_player/model/playlist_model.dart';
 import 'package:music_player/services/hiveservice/hiveservice.dart';
 import 'package:music_player/services/locator.dart';
 import 'package:music_player/services/playerservice/player_service.dart';
@@ -44,27 +46,26 @@ class FavoriteSongModel extends GetxController {
   }
 
   void fetchSong() async {
-
     await fetchFavorite();
 
     FlutterAudioQuery query = FlutterAudioQuery();
 
-    songList = await query.getSongs()..retainWhere((element) => favUrls.contains(element.filePath));
+    songList = await query.getSongs()
+      ..retainWhere((element) => favUrls.contains(element.filePath));
     queryService.addPlayListFavorite(songList);
     print("Favorite Song Size is ${songList.length}");
 
     update();
-
   }
 
-  Future<void> fetchFavorite()  {
-   return Future(() async{
-     var box = await hiveService.openBox("favoriteSongs");
+  Future<void> fetchFavorite() {
+    return Future(() async {
+      var box = await hiveService.openBox("favoriteSongs");
 
-     favUrls = box.get("fav");
-     if (favUrls == null) {
-       favUrls = [];
-     }
+      favUrls = box.get("fav");
+      if (favUrls == null) {
+        favUrls = [];
+      }
     });
   }
 
@@ -73,15 +74,12 @@ class FavoriteSongModel extends GetxController {
   }
 
   void saveFavoriteSong(String url) async {
-
-
     favUrls.remove(url);
     songList.removeWhere((element) => element.filePath == url);
     queryService.addPlayListFavorite(songList);
 
-    if(url == currentUrl){
-
-      if(currentAudioIndex > url.length) currentAudioIndex --;
+    if (url == currentUrl) {
+      if (currentAudioIndex > url.length) currentAudioIndex--;
       playSong(currentAudioIndex);
     }
 
@@ -136,47 +134,62 @@ class FavoriteSongModel extends GetxController {
   }
 
   void playListSelected(String name) async {
-
-    if(Get.isDialogOpen){
+    if (Get.isDialogOpen) {
       Get.back();
     }
 
     var playListBox = await hiveService.getBox("playList");
 
-    List<String> playList = playListBox.get(name);
+    HivePlaylistModel playList = playListBox.get(name);
 
-    playList.add(currentPlayListUrl);
+    if (playList.urls == null) {
+      playList.urls = [];
+    }
+
+    playList.urls.add(currentPlayListUrl);
 
     playListBox.put(name, playList);
-
   }
 
   void addToPlayList(String url) async {
-
-
     var playListBox = await hiveService.openBox("playList");
-
 
     List<String> names = playListBox.get("playListNames");
 
     currentPlayListUrl = url;
 
-    if(names == null || names.isEmpty){
-
+    if (names == null || names.isEmpty) {
       await dialogService.showDialog(
           title: "Empty",
           description: "No Playlist found",
           buttonTitle: "Ok",
-          barrierDismissible: true
-      );
+          barrierDismissible: true);
 
       return;
     }
 
-
-
     Get.dialog(
-      dialogContent(names,  playListSelected),
+      AlertDialog(
+        title: Text("Add To Playlist"),
+        content: dialogContent(names, playListSelected),
+        actions: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 10, bottom: 10),
+            child: InkWell(
+              onTap: () {
+                Get.back();
+              },
+              child: Text(
+                "Cancel",
+                style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: Colors.red),
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 

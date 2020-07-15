@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_exoplayer/audioplayer.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player/model/HiveSongInfo.dart';
+import 'package:music_player/model/playlist_model.dart';
 import 'package:music_player/services/hiveservice/hiveservice.dart';
 import 'package:music_player/services/locator.dart';
 import 'package:music_player/services/playerservice/player_service.dart';
@@ -146,9 +148,13 @@ class AllSongViewModel extends GetxController {
 
     var playListBox = await hiveService.getBox("playList");
 
-    List<String> playList = playListBox.get(name);
+    HivePlaylistModel playList = playListBox.get(name);
 
-    playList.add(currentPlayListUrl);
+    if(playList.urls == null){
+      playList.urls = [];
+    }
+
+    playList.urls.add(currentPlayListUrl);
 
     playListBox.put(name, playList);
 
@@ -179,8 +185,32 @@ class AllSongViewModel extends GetxController {
 
 
     Get.dialog(
-        dialogContent(names,  playListSelected),
+      AlertDialog(
+        title:  Text("Add To Playlist"),
+        content: dialogContent(names,  playListSelected),
+
+        actions: <Widget>[
+
+          Padding(padding: EdgeInsets.only(
+              right: 10,
+              bottom: 10
+          ),
+            child: InkWell(
+              onTap: (){
+                Get.back();
+              },
+              child: Text("Cancel", style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  color:  Colors.red
+              ),),
+            ),
+          )
+
+        ],
+      ),
     );
+
   }
 
 

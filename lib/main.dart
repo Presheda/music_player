@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:music_player/model/playlist_model.dart';
 
 import 'package:music_player/services/locator.dart';
 import 'package:music_player/ui/homepage/now_playing.dart';
@@ -22,6 +23,7 @@ void main() async {
   final dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
   Hive.registerAdapter(HiveSongInfoAdapter());
+  Hive.registerAdapter(HivePlaylistModelAdapter());
 
   runApp(MyApp());
 }
