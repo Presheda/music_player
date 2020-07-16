@@ -10,7 +10,7 @@ abstract class PlayerService{
 
   Future<dynamic> playAll({int index});
 
-  Future<dynamic> playPlaylistFavorites(List<String> url, int index);
+  Future<dynamic> playPlaylistFavorites(List<String> url, int index, {String name});
 
   Future<dynamic> pauseSong();
 
@@ -35,5 +35,7 @@ abstract class PlayerService{
  Future<HiveSongInfo> getCurrentSong();
 
  PlayerState getPlayerState();
+
+ String getCurrentPlaylist ();
 
 }

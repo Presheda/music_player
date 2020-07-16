@@ -51,6 +51,44 @@ class PlayList extends StatelessWidget {
                                         Colors.black.withOpacity(0.6),
                                         BlendMode.darken))),
                           ),
+
+
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: IconButton(icon: Icon(Icons.delete, color: Colors.grey,),
+                                onPressed: (){model.deletePlaylist(e.name);}),
+                          ),
+
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 12,
+                                right: 8
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle
+                                ),
+                                child: InkWell(child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Icon(model.currentPlaylist == e.name ? Icons.pause : Icons.play_arrow, size: 25, color: Colors.white,),
+                                ),
+                                    onTap: (){
+
+                                  if(model.currentPlaylist == e.name){
+
+                                    model.pausePlaylist();
+                                  } else{
+                                    model.playPlaylist(e);
+                                  }
+
+                                    }),
+                              ),
+                            ),
+                          ),
+
                           Align(
                             alignment: Alignment.bottomLeft,
                             child: Padding(

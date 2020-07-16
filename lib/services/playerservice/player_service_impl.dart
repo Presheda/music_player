@@ -22,6 +22,9 @@ class PlayerServiceImpl implements PlayerService {
   bool playListFavorite = false;
 
 
+  String currentPlayList = "";
+
+
   PlayerServiceImpl() {
     loadPreviousSong();
 
@@ -56,6 +59,12 @@ class PlayerServiceImpl implements PlayerService {
   }
 
   @override
+  String getCurrentPlaylist()  {
+
+    return currentPlayList;
+  }
+
+  @override
   PlayerState getPlayerState(){
 
     return player.playerState;
@@ -83,10 +92,14 @@ class PlayerServiceImpl implements PlayerService {
   }
 
   @override
-  Future playPlaylistFavorites(List<String> url, int index) async {
+  Future playPlaylistFavorites(List<String> url, int index, {String name}) async {
 
     if (player.state == PlayerState.PLAYING) {
       await player.stop();
+    }
+
+    if(name != null){
+      this.currentPlayList = name;
     }
 
     this.urls = url;
@@ -100,6 +113,8 @@ class PlayerServiceImpl implements PlayerService {
     if (player.state == PlayerState.PLAYING) {
       await player.stop();
     }
+
+    this.currentPlayList = "";
 
     this.urls = queryService.url();
     await player.release();

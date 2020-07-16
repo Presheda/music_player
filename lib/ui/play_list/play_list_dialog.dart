@@ -58,7 +58,7 @@ void registerCustomDialogUi() {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                "Enter name",
+                "Playlist name",
                 style: GoogleFonts.poppins(
                   fontStyle: FontStyle.normal,
                   fontWeight: FontWeight.w600,
