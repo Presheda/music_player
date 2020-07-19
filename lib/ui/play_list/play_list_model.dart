@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:flutter_exoplayer/audioplayer.dart';
 import 'package:get/get.dart';
 import 'package:music_player/model/playlist_model.dart';
 import 'package:music_player/services/hiveservice/hiveservice.dart';
@@ -6,6 +9,7 @@ import 'package:music_player/services/locator.dart';
 import 'package:music_player/services/playerservice/player_service.dart';
 import 'package:music_player/services/querysong/query_song_service.dart';
 import 'package:music_player/ui/play_list/play_list_dialog.dart';
+import 'file:///C:/Users/Precious/FlutterApp/music_player/lib/ui/playlist_detail/playlist_detail.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 class PlayListModel extends GetxController {
@@ -18,6 +22,12 @@ class PlayListModel extends GetxController {
   List<SongInfo> songList = [];
 
 
+  StreamSubscription<PlayerState> state;
+
+  bool isPaused = false;
+  bool isPlaying = false;
+
+
 
   List<HivePlaylistModel> get playListName => _playListName;
 
@@ -26,6 +36,9 @@ class PlayListModel extends GetxController {
 
 
   PlayListModel() {
+
+    playerStateChanged(playerService.getPlayerState());
+    addSubSubscription();
     fetchPlaylist();
   }
 
@@ -51,6 +64,22 @@ class PlayListModel extends GetxController {
     if(model.urls == null || model.urls.isEmpty){
       return;
     }
+
+    if(currentPlaylist == model.name){
+      if (isPlaying) {
+        playerService.pauseSong();
+        update();
+        return;
+      }
+
+      if (isPaused) {
+        playerService.resumeSong();
+        update();
+        return;
+      }
+    }
+
+
 
     FlutterAudioQuery query = FlutterAudioQuery();
 
@@ -132,7 +161,30 @@ class PlayListModel extends GetxController {
     fetchPlaylist();
   }
 
-  void pausePlaylist() async {
-    playerService.pauseSong();
+
+
+  void playerStateChanged(PlayerState state) {
+    print("State Changed");
+    isPaused = state == PlayerState.PAUSED;
+    isPlaying = state == PlayerState.PLAYING;
+    update(["updateIcons"]);
   }
+
+  addSubSubscription() {
+    state = playerService.playerState().listen((event) {
+      playerStateChanged(event);
+    });
+
+  }
+
+  void openDetail(String name) {
+
+    String route = "/playlist/$name";
+
+    print("rout is: $route");
+    Get.toNamed(route, );
+  }
+
+
+
 }

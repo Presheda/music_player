@@ -34,7 +34,9 @@ class PlayList extends StatelessWidget {
                     padding:
                     const EdgeInsets.only(bottom: 10, left: 5, right: 5),
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        model.openDetail(e.name);
+                      },
                       child: Stack(
                         children: <Widget>[
                           Container(
@@ -77,12 +79,10 @@ class PlayList extends StatelessWidget {
                                 ),
                                     onTap: (){
 
-                                  if(model.currentPlaylist == e.name){
 
-                                    model.pausePlaylist();
-                                  } else{
+
                                     model.playPlaylist(e);
-                                  }
+
 
                                     }),
                               ),
