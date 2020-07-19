@@ -84,6 +84,10 @@ class AllSongViewModel extends GetxController {
 
 
     box.put("fav", favUrls);
+
+
+    Get.rawSnackbar(message: "Song was successfully added to favorite");
+
   }
 
   void getCurrentSongUrl() async {

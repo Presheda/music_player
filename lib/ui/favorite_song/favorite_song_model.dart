@@ -88,6 +88,10 @@ class FavoriteSongModel extends GetxController {
     var box = await hiveService.openBox("favoriteSongs");
 
     box.put("fav", favUrls);
+
+
+
+    Get.rawSnackbar(message: "Song was successfully removed from favorite");
   }
 
   void getCurrentSongUrl() async {
