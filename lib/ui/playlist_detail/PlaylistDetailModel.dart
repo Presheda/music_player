@@ -25,9 +25,6 @@ class PlaylistDetailModel extends GetxController {
   var dialogService = getIt<DialogService>();
 
 
-
-  List<String> favUrls = [];
-
   StreamSubscription<int> audioIndex;
   StreamSubscription<PlayerState> state;
 
@@ -41,13 +38,16 @@ class PlaylistDetailModel extends GetxController {
 
   String currentPlayListUrl = "";
 
+  List<SongInfo> songList = [];
+
+  List<String> playListUrl;
+
+
   PlaylistDetailModel({String name}){
     this.name = name;
 
     addSubSubscription();
-
     fetchSong();
-    fetchFavorite();
 
     getCurrentSongUrl();
     playerStateChanged(playerService.getPlayerState());
@@ -55,40 +55,28 @@ class PlaylistDetailModel extends GetxController {
 
 
 
-  void fetchSong() {
-    songList = queryService.songList();
+  void fetchSong() async {
+    await fetchPlaylist();
+
+    FlutterAudioQuery query = FlutterAudioQuery();
+
+    songList = await query.getSongs()
+      ..retainWhere((element) => playListUrl.contains(element.filePath));
+    queryService.addPlayListFavorite(songList);
+    print("Favorite Song Size is ${songList.length}");
+
+    update();
   }
 
-  void fetchFavorite() async {
-    var box = await hiveService.openBox("favoriteSongs");
+  Future<void>  fetchPlaylist() async {
+    var playListBox = await hiveService.openBox("playList");
 
+    HivePlaylistModel model = playListBox.get(name);
 
-    favUrls = box.get("fav");
-    if (favUrls == null) {
-      favUrls = [];
-    }
-    update(["updateIcons"]);
+    playListUrl = model.urls;
   }
 
-  bool isFavorite(String url) {
-    return favUrls.contains(url);
-  }
 
-  void saveFavoriteSong(String url) async {
-    bool isAdded = favUrls.contains(url);
-
-    if (isAdded) {
-      favUrls.remove(url);
-    } else {
-      favUrls.add(url);
-    }
-    update(["updateIcons"]);
-
-    var box = await hiveService.openBox("favoriteSongs");
-
-
-    box.put("fav", favUrls);
-  }
 
   void getCurrentSongUrl() async {
     HiveSongInfo songInfo = await playerService.getCurrentSong();
@@ -96,9 +84,8 @@ class PlaylistDetailModel extends GetxController {
     update(["updateIcons"]);
   }
 
-
   void playSong(int index) {
-    playerService.playAll(index: index);
+    playerService.playPlaylistFavorites(playListUrl, index);
   }
 
   void playPause() {
@@ -120,7 +107,6 @@ class PlaylistDetailModel extends GetxController {
     update(["updateIcons"]);
   }
 
-
   addSubSubscription() {
     state = playerService.playerState().listen((event) {
       playerStateChanged(event);
@@ -135,18 +121,8 @@ class PlaylistDetailModel extends GetxController {
     });
   }
 
-  @override
-  void onClose() {
-    state?.cancel();
-    audioIndex?.cancel();
-
-
-    super.onClose();
-  }
-
   void playListSelected(String name) async {
-
-    if(Get.isDialogOpen){
+    if (Get.isDialogOpen) {
       Get.back();
     }
 
@@ -154,67 +130,85 @@ class PlaylistDetailModel extends GetxController {
 
     HivePlaylistModel playList = playListBox.get(name);
 
-    if(playList.urls == null){
+    if (playList.urls == null) {
       playList.urls = [];
     }
 
     playList.urls.add(currentPlayListUrl);
 
     playListBox.put(name, playList);
-
   }
 
   void addToPlayList(String url) async {
-
-
     var playListBox = await hiveService.openBox("playList");
-
 
     List<String> names = playListBox.get("playListNames");
 
     currentPlayListUrl = url;
 
-    if(names == null || names.isEmpty){
-
+    if (names == null || names.isEmpty) {
       await dialogService.showDialog(
           title: "Empty",
           description: "No Playlist found",
           buttonTitle: "Ok",
-          barrierDismissible: true
-      );
+          barrierDismissible: true);
 
       return;
     }
 
-
-
     Get.dialog(
       AlertDialog(
-        title:  Text("Add To Playlist"),
-        content: dialogContent(names,  playListSelected),
-
+        title: Text("Add To Playlist"),
+        content: dialogContent(names, playListSelected),
         actions: <Widget>[
-
-          Padding(padding: EdgeInsets.only(
-              right: 10,
-              bottom: 10
-          ),
+          Padding(
+            padding: EdgeInsets.only(right: 10, bottom: 10),
             child: InkWell(
-              onTap: (){
+              onTap: () {
                 Get.back();
               },
-              child: Text("Cancel", style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                  color:  Colors.red
-              ),),
+              child: Text(
+                "Cancel",
+                style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: Colors.red),
+              ),
             ),
           )
-
         ],
       ),
     );
-
   }
 
+  @override
+  void onClose() {
+    state?.cancel();
+    audioIndex?.cancel();
+
+    super.onClose();
+  }
+
+  void removeFromPlayList(String url) async {
+
+    var playListBox = await hiveService.openBox("playList");
+
+    HivePlaylistModel model = playListBox.get(name);
+
+
+    playListUrl.remove(url);
+    model.urls = playListUrl;
+
+    playListBox.put(name, model);
+
+    if(currentUrl == url){
+      playerService.pauseSong();
+    }
+
+    fetchSong();
+
+
+
+
+  }
 }

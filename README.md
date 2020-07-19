@@ -1,16 +1,14 @@
 # music_player
 
-A simple music player built with flutter
+A simple music player built with flutter. this app supports playing local audio files in the device storage
+Currently it only works on android
 
-## Getting Started
+## Dependencies
 
-This project is a starting point for a Flutter application.
+Below are some of the package used by this app
 
-A few resources to get you started if this is your first Flutter project:
+- [Get: State Management and navigation ](https://pub.dev/packages/get)
+- [Flutter exoplayer: Plays Audio files both locally and network ](https://pub.dev/packages/flutter_exoplayer)
+- [FlutterAudioQuery: Fetches the song from the device storage](https://pub.dev/packages/flutter_audio_query)
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
